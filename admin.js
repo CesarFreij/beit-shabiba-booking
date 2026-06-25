@@ -75,11 +75,12 @@ async function init() {
     db = firestoreModule.getFirestore(app);
     auth = authModule.getAuth(app);
 
+    authModule.onAuthStateChanged(auth, handleAuthState);
+
     bindEvents();
     populateRoomFilter();
     populateRoomSelect();
 
-    authModule.onAuthStateChanged(auth, handleAuthState);
   } catch (error) {
     console.error('Firebase init error:', error);
     showAuthError('صار خطأ بتشغيل Firebase. افتح Console وشوف الخطأ.');
@@ -102,14 +103,20 @@ function bindEvents() {
 
 function handleAdminLogin() {
   clearAuthError();
+
   const email = elements.adminEmail.value.trim();
   const password = elements.adminPassword.value.trim();
+
   if (!email || !password) {
     showAuthError('يرجى إدخال البريد الإلكتروني وكلمة المرور.');
     return;
   }
-  signInWithEmailAndPassword(auth, email, password)
-    .catch(() => showAuthError('بيانات الدخول غير صحيحة. حاول مرة أخرى.'));
+
+  authModule.signInWithEmailAndPassword(auth, email, password)
+    .catch((error) => {
+      console.error('Admin login error:', error);
+      showAuthError('بيانات الدخول غير صحيحة أو لم يتم تفعيل Email/Password في Firebase.');
+    });
 }
 
 function handleAuthState(user) {
@@ -368,7 +375,11 @@ async function deleteBooking(bookingId) {
 }
 
 async function markNotificationRead(notificationId) {
-  const notificationRef = dfirestoreModule.oc(db, 'notifications', notificationId);
+  const notificationRef = firestoreModule.doc(
+  db,
+  'notifications',
+  notificationId
+);
   await firestoreModule.updateDoc(notificationRef, { read: true });
 }
 
@@ -416,7 +427,7 @@ function clearEditAlert() {
 
 async function handleSignOut() {
   try {
-    await signOut(auth);
+    await authModule.signOut(auth);
   } catch (error) {
     console.error('Sign out failed:', error);
     showAuthError('تعذر تسجيل الخروج. حاول مرة ثانية.');
