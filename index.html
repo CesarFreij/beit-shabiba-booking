@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>حجوزات بيت الشبيبة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="brand-row">
+        <div class="brand-logo">
+          <i class="fa-solid fa-house-chimney"></i>
+        </div>
+        <div>
+          <h1>حجوزات بيت الشبيبة</h1>
+          <p>نظام حجوزات الغرف وقاعة التدريبات</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="toggleTheme" class="icon-btn" title="تبديل الوضع الليلي"><i class="fa-solid fa-moon"></i></button>
+        <a href="admin.html" class="btn-outline"><i class="fa-solid fa-user-shield"></i> دخول الأدمن</a>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section class="hero-card">
+        <div>
+          <h2>مرحبا بك في نظام الحجوزات</h2>
+          <p>الرجاء إدخال كلمة المرور المشتركة للمتابعة إلى صفحة الحجز.</p>
+        </div>
+        <div>
+          <button class="btn-primary" id="showUsage">طريقة الاستخدام</button>
+        </div>
+      </section>
+
+      <div id="bookingGate" class="gate-card card panel-card">
+        <h3><i class="fa-solid fa-lock"></i> تسجيل الدخول السريع</h3>
+        <p>أدخل كلمة المرور المشتركة لحجز غرف بيت الشبيبة.</p>
+        <form class="form-group">
+          <label for="bookingPassword">كلمة المرور المشتركة</label>
+          <input id="bookingPassword" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password" />
+          <input id="confirmAccess" class="btn-primary btn-full" type="submit" value="متابعة" />
+        </form>
+        <p class="hint-text">كلمة المرور يمكن تغييرها لاحقًا من الملف <code>config.js</code>.</p>
+      </div>
+
+      <div id="appShell" class="hidden">
+        <section class="grid-layout">
+          <article class="card calendar-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow"><i class="fa-regular fa-calendar"></i> رزنامة الشهر</p>
+                <h3 id="monthTitle"></h3>
+              </div>
+              <div class="header-actions">
+                <button id="prevMonth" class="icon-btn" title="الشهر السابق" aria-label="الشهر السابق"><i class="fa-solid fa-chevron-right"></i></button>
+                <button id="nextMonth" class="icon-btn" title="الشهر التالي" aria-label="الشهر التالي"><i class="fa-solid fa-chevron-left"></i></button>
+              </div>
+            </div>
+            <div class="weekdays-row">
+              <span>أحد</span>
+              <span>اثنين</span>
+              <span>ثلاثاء</span>
+              <span>أربعاء</span>
+              <span>خميس</span>
+              <span>جمعة</span>
+              <span>سبت</span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+            <div class="calendar-footer">
+              <button id="todayButton" class="btn-secondary"><i class="fa-solid fa-location-crosshairs"></i> تاريخ اليوم</button>
+            </div>
+          </article>
+
+          <article class="card summary-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow"><i class="fa-solid fa-clock"></i> تفاصيل اليوم</p>
+                <h3 id="selectedDayTitle"></h3>
+              </div>
+            </div>
+            <div class="room-selector" id="roomTabs"></div>
+            <div class="timeline-card">
+              <div class="timeline-legend">
+                <span class="status-pill available">متاح</span>
+                <span class="status-pill booked">محجوز</span>
+                <span class="status-pill past">انتهى</span>
+              </div>
+              <div id="timelineGrid" class="timeline-grid"></div>
+            </div>
+          </article>
+        </section>
+
+        <section class="grid-layout booking-panel">
+          <article class="card booking-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow"><i class="fa-solid fa-folder-open"></i> نموذج الحجز</p>
+                <h3>احجز الغرفة بسهولة</h3>
+              </div>
+            </div>
+            <div id="alertBox" class="alert-box hidden"></div>
+            <form id="bookingForm" class="booking-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="groupName">اسم المرحلة أو الفرقة</label>
+                  <input id="groupName" type="text" placeholder="مثال: فرقة الصبايا" required />
+                </div>
+                <div class="form-group">
+                  <label for="leaderName">اسم مسؤول الفرقة</label>
+                  <input id="leaderName" type="text" placeholder="مثال: محمد علي" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="phoneInput">رقم الهاتف</label>
+                  <input id="phoneInput" type="tel" placeholder="0501234567" required />
+                </div>
+                <div class="form-group">
+                  <label for="roomSelect">الغرفة</label>
+                  <select id="roomSelect"></select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="bookingDate">تاريخ الحجز</label>
+                  <input id="bookingDate" type="date" required />
+                </div>
+                <div class="form-group">
+                  <label for="startTime">وقت البداية</label>
+                  <input id="startTime" type="time" required />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="endTime">وقت النهاية</label>
+                  <input id="endTime" type="time" required />
+                </div>
+                <div class="form-group">
+                  <label for="durationLabel">مدة الحجز</label>
+                  <div class="duration-box"><span id="durationLabel">1 ساعة</span></div>
+                </div>
+              </div>
+              <div class="form-group checkbox-group">
+                <input id="repeatWeekly" type="checkbox" />
+                <label for="repeatWeekly">حجز أسبوعي متكرر</label>
+              </div>
+              <div id="repeatSection" class="repeat-section hidden">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="repeatDay">يوم الأسبوع</label>
+                    <select id="repeatDay"></select>
+                  </div>
+                  <div class="form-group">
+                    <label for="repeatFrom">بداية التكرار</label>
+                    <input id="repeatFrom" type="date" />
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="repeatTo">نهاية التكرار</label>
+                    <input id="repeatTo" type="date" />
+                  </div>
+                  <div class="form-note">يجب اختيار تاريخ نهاية لتأكيد التكرار.</div>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="notesInput">ملاحظات إضافية</label>
+                <textarea id="notesInput" rows="4" placeholder="مثال: تحتاج معدات موسيقية"></textarea>
+              </div>
+              <button type="submit" class="btn-primary btn-full">إرسال الحجز</button>
+            </form>
+          </article>
+
+          <article class="card bookings-list-card">
+            <div class="section-header">
+              <div>
+                <p class="eyebrow"><i class="fa-solid fa-book-open-reader"></i> حجوزاتي</p>
+                <h3>الحجوزات التي أنشأتها</h3>
+              </div>
+            </div>
+            <div id="myBookingsList" class="booking-list"></div>
+          </article>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="usageModal" class="modal hidden">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3>طريقة الاستخدام</h3>
+        <button id="closeUsage" class="icon-btn" title="إغلاق" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <ol>
+          <li>أدخل كلمة المرور المشتركة في صفحة الحجز لفتح النموذج.</li>
+          <li>اختر اليوم من الرزنامة ثم الغرفة لعرض جدول الساعات.</li>
+          <li>حدد وقت البداية والنهاية ثم اكتب بيانات الفرقة.</li>
+          <li>للحجز الأسبوعي، فعّل الخيار وحدد بداية ونهاية التكرار.</li>
+          <li>يمكنك إلغاء حجوزاتك من قسم "حجوزاتي" فورًا.</li>
+          <li>للوصول إلى لوحة الأدمن، اضغط على "دخول الأدمن" وأدخل بيانات Firebase.</li>
+        </ol>
+      </div>
+      <div class="modal-actions">
+        <button id="closeUsageAction" class="btn-secondary btn-full">فهمت</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-card">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>جاري التحميل...</span>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة أدمن - حجوزات بيت الشبيبة</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page-shell admin-shell">
+    <header class="topbar">
+      <div class="brand-row">
+        <div class="brand-logo admin-logo">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div>
+          <h1>لوحة تحكم الأدمن</h1>
+          <p>إدارة الحجوزات وتنبيهات بيت الشبيبة</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> الرجوع للحجز</a>
+      </div>
+    </header>
+
+    <main class="main-content admin-content">
+      <div id="authSection" class="card auth-card">
+        <h2>تسجيل دخول الأدمن</h2>
+        <p>استخدم البريد الإلكتروني وكلمة المرور الخاصة بالأدمن.</p>
+        <div id="authAlert" class="alert-box hidden"></div>
+        <div class="form-group">
+          <label for="adminEmail">البريد الإلكتروني</label>
+          <input id="adminEmail" type="email" placeholder="admin@example.com" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label for="adminPassword">كلمة المرور</label>
+          <input id="adminPassword" type="password" placeholder="أدخل كلمة المرور" autocomplete="current-password" />
+        </div>
+        <button id="adminLogin" class="btn-primary btn-full">دخول الأدمن</button>
+      </div>
+
+      <div id="dashboard" class="hidden">
+        <section class="dashboard-stats grid-layout">
+          <article class="stat-card card">
+            <p class="eyebrow"><i class="fa-solid fa-list-check"></i> الحجوزات القادمة</p>
+            <h2 id="upcomingCount">0</h2>
+          </article>
+          <article class="stat-card card">
+            <p class="eyebrow"><i class="fa-solid fa-calendar-day"></i> حجوزات اليوم</p>
+            <h2 id="todayCount">0</h2>
+          </article>
+          <article class="stat-card card">
+            <p class="eyebrow"><i class="fa-solid fa-bell"></i> إشعارات جديدة</p>
+            <h2 id="notificationCount">0</h2>
+          </article>
+          <article class="stat-card card">
+            <p class="eyebrow"><i class="fa-solid fa-power-off"></i> حالة الاتصال</p>
+            <h2 id="adminState">غير متصل</h2>
+          </article>
+        </section>
+
+        <section class="card admin-panel">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow"><i class="fa-solid fa-filter"></i> التحكم السريع</p>
+              <h3>فلترة الحجوزات</h3>
+            </div>
+          </div>
+          <div class="filter-row">
+            <div class="form-group">
+              <label for="filterDate">التاريخ</label>
+              <input id="filterDate" type="date" />
+            </div>
+            <div class="form-group">
+              <label for="filterRoom">الغرفة</label>
+              <select id="filterRoom"></select>
+            </div>
+            <div class="form-group">
+              <label for="filterGroup">الفرقة</label>
+              <input id="filterGroup" type="text" placeholder="اسم الفرقة" />
+            </div>
+            <button id="clearFilter" class="btn-secondary">مسح الفلاتر</button>
+          </div>
+        </section>
+
+        <section class="card admin-bookings-card">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow"><i class="fa-solid fa-table-list"></i> الحجوزات</p>
+              <h3>جميع الحجوزات القادمة</h3>
+            </div>
+            <button id="adminSignOut" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
+          </div>
+          <div id="bookingsTable" class="table-responsive"></div>
+        </section>
+
+        <section class="card notifications-card">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow"><i class="fa-solid fa-bell-on"></i> الإشعارات</p>
+              <h3>آخر إشعارات الحجز</h3>
+            </div>
+          </div>
+          <div id="notificationList" class="notification-list"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="editModal" class="modal hidden">
+    <div class="modal-content card">
+      <div class="modal-header">
+        <h3>تعديل الحجز</h3>
+        <button id="closeEdit" class="icon-btn" title="إغلاق" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div id="editAlert" class="alert-box hidden"></div>
+        <form id="editForm" class="booking-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editGroupName">اسم الفرقة</label>
+              <input id="editGroupName" type="text" required />
+            </div>
+            <div class="form-group">
+              <label for="editLeaderName">اسم المسؤول</label>
+              <input id="editLeaderName" type="text" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editPhone">رقم الهاتف</label>
+              <input id="editPhone" type="tel" required />
+            </div>
+            <div class="form-group">
+              <label for="editRoomSelect">الغرفة</label>
+              <select id="editRoomSelect"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editDate">التاريخ</label>
+              <input id="editDate" type="date" required />
+            </div>
+            <div class="form-group">
+              <label for="editStartTime">وقت البداية</label>
+              <input id="editStartTime" type="time" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editEndTime">وقت النهاية</label>
+              <input id="editEndTime" type="time" required />
+            </div>
+            <div class="form-group">
+              <label for="editNotes">ملاحظات</label>
+              <input id="editNotes" type="text" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" id="cancelEdit" class="btn-secondary">إلغاء</button>
+            <button type="submit" class="btn-primary">حفظ التعديل</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-card">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>جاري التحميل...</span>
+    </div>
+  </div>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
