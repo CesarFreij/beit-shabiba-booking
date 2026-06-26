@@ -26,7 +26,7 @@
         <a href="index.html" class="btn-outline"><i class="fa-solid fa-arrow-left"></i> الرجوع للحجز</a>
       </div>
     </header>
-
+    
     <main class="main-content admin-content">
       <div id="authSection" class="card auth-card">
         <h2>تسجيل دخول الأدمن</h2>
@@ -93,7 +93,6 @@
               <p class="eyebrow"><i class="fa-solid fa-table-list"></i> الحجوزات</p>
               <h3>جميع الحجوزات القادمة</h3>
             </div>
-            <button id="adminSignOut" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
           </div>
           <div id="bookingsTable" class="table-responsive"></div>
         </section>
@@ -107,13 +106,14 @@
           </div>
           <div id="notificationList" class="notification-list"></div>
         </section>
+        <button id="adminSignOut" class="btn-secondary"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</button>
       </div>
     </main>
   </div>
 
   <div id="editModal" class="modal hidden">
     <div class="modal-content card">
-      <div class="modal-header">
+      <div id="modal-header" class="modal-header">
         <h3>تعديل الحجز</h3>
         <button id="closeEdit" class="icon-btn" title="إغلاق" aria-label="إغلاق"><i class="fa-solid fa-xmark"></i></button>
       </div>

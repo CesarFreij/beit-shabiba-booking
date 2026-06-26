@@ -82,6 +82,7 @@ const elements = {
   usageModal: document.getElementById('usageModal'),
   closeUsage: document.getElementById('closeUsage'),
   closeUsageAction: document.getElementById('closeUsageAction'),
+  userSignOut: document.getElementById('userSignOut'),
 };
 
 showLoading();
@@ -113,6 +114,7 @@ function bindEvents() {
   elements.closeUsage.addEventListener('click', () => toggleModal(false));
   elements.closeUsageAction.addEventListener('click', () => toggleModal(false));
   elements.toggleTheme.addEventListener('click', toggleThemeMode);
+  elements.userSignOut.addEventListener('click', handleSignOut);
 }
 
 function showLoading() {
@@ -680,4 +682,16 @@ function showTemporaryMessage(message) {
 
 function toggleModal(show) {
   elements.usageModal.classList.toggle('hidden', !show);
+}
+
+function handleSignOut() {
+  localStorage.removeItem("youthHouseGate");
+
+  if (unsubscribeDay) unsubscribeDay();
+  if (unsubscribeMine) unsubscribeMine();
+
+  elements.appShell.classList.add("hidden");
+  elements.bookingGate.classList.remove("hidden");
+
+  elements.bookingPassword.value = "";
 }
