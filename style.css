@@ -712,32 +712,29 @@ button, select, input, textarea {
 
 @media (max-width: 740px) {
   .topbar, .modal-header, .modal-actions {
-    flex-direction: column;
     align-items: stretch;
   }
 
   .booking-panel {
     grid-template-columns: 1fr;
   }
-
+  
   .calendar-grid {
     grid-template-columns: repeat(5, 1fr);
   }
-
+  
   .bookings-table th, .bookings-table td {
     padding: 12px 10px;
   }
 }
 
 @media (max-width: 520px) {
+  .modal{
+    transform: translateX(315px);
+  }
   .calendar-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-
-  .btn, .icon-btn {
-    width: 100%;
-  }
-
   .room-tab {
     flex: 1 1 100%;
   }
