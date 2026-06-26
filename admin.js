@@ -5,6 +5,9 @@ let auth;
 let firestoreModule;
 let authModule;
 
+let collection, query, where, orderBy, onSnapshot, addDoc, doc, deleteDoc, runTransaction, serverTimestamp, updateDoc, getDocs;
+let signInWithEmailAndPassword, onAuthStateChanged, signOut;
+
 let adminBookings = [];
 let notifications = [];
 let subscriptionBookings = null;
@@ -66,9 +69,30 @@ async function init() {
       'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js'
     );
 
+    ({
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
+} = authModule);
+
     firestoreModule = await import(
       'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js'
     );
+
+    ({
+  collection,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  doc,
+  deleteDoc,
+  runTransaction,
+  serverTimestamp,
+  updateDoc,
+  getDocs
+} = firestoreModule);
 
     const app = firebaseAppModule.initializeApp(firebaseConfig);
 
@@ -134,29 +158,60 @@ function handleAuthState(user) {
 }
 
 function subscribeAdminData() {
-  const today = new Date();
-  const todayString = formatDate(today);
-  const bookingsQuery = query(
-    firestoreModule.collection(db, 'bookings'),
-    firestoreModule.where('date', '>=', todayString),
-    firestoreModule.orderBy('date'),
-    firestoreModule.orderBy('startTime')
-  );
-  subscriptionBookings = firestoreModule.onSnapshot(bookingsQuery, snapshot => {
-    adminBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderStats();
-    renderBookingsTable();
-  });
+  const bookingsRef = collection(db, 'bookings');
 
-  const notificationsQuery = query(
-    firestoreModule.collection(db, 'notifications'),
-    firestoreModule.where('read', '==', false),
-    firestoreModule.orderBy('createdAt', 'desc')
+  subscriptionBookings = onSnapshot(
+    bookingsRef,
+    (snapshot) => {
+      adminBookings = snapshot.docs
+        .map(item => ({
+          id: item.id,
+          ...item.data()
+        }))
+        .sort((a, b) => {
+          const dateCompare = (a.date || '').localeCompare(b.date || '');
+          if (dateCompare !== 0) return dateCompare;
+          return (a.startTime || '').localeCompare(b.startTime || '');
+        });
+
+      console.log('عدد الحجوزات:', adminBookings.length);
+
+      renderStats();
+      renderBookingsTable();
+    },
+    (error) => {
+      console.error('خطأ قراءة الحجوزات:', error);
+      alert('خطأ Firebase بالحجوزات: ' + error.message);
+    }
   );
-  subscriptionNotifications = firestoreModule.onSnapshot(notificationsQuery, snapshot => {
-    notifications = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderNotifications();
-  });
+
+  const notificationsRef = collection(db, 'notifications');
+
+  subscriptionNotifications = onSnapshot(
+    notificationsRef,
+    (snapshot) => {
+      notifications = snapshot.docs
+        .map(item => ({
+          id: item.id,
+          ...item.data()
+        }))
+        .filter(item => item.read !== true)
+        .sort((a, b) => {
+          const dateA = a.createdAt?.toMillis?.() || 0;
+          const dateB = b.createdAt?.toMillis?.() || 0;
+          return dateB - dateA;
+        });
+
+      console.log('عدد الإشعارات غير المقروءة:', notifications.length);
+
+      renderNotifications();
+      renderStats();
+    },
+    (error) => {
+      console.error('خطأ تحميل الإشعارات:', error);
+      alert('خطأ Firebase بالإشعارات: ' + error.message);
+    }
+  );
 }
 
 function unsubscribeAdminData() {
@@ -343,7 +398,7 @@ async function updateBooking(bookingId, payload) {
       throw new Error('الحجز غير موجود أو تم حذفه.');
     }
     const bookingsQuery = query(firestoreModule.collection(db, 'bookings'), firestoreModule.where('room', '==', payload.room), firestoreModule.where('date', '==', payload.date));
-    const snapshot = await tx.get(bookingsQuery);
+    const snapshot = await getDocs(bookingsQuery);
     snapshot.docs.forEach(docSnap => {
       if (docSnap.id === bookingId) return;
       const existing = docSnap.data();
@@ -375,21 +430,29 @@ async function deleteBooking(bookingId) {
 }
 
 async function markNotificationRead(notificationId) {
-  const notificationRef = firestoreModule.doc(
-  db,
-  'notifications',
-  notificationId
-);
-  await firestoreModule.updateDoc(notificationRef, { read: true });
-}
+  try {
+    await updateDoc(doc(db, 'notifications', notificationId), {
+      read: true
+    });
 
-function timeToMinutes(value) {
-  const [hours, minutes] = value.split(':').map(Number);
-  return hours * 60 + minutes;
+    notifications = notifications.filter(note => note.id !== notificationId);
+
+    renderNotifications();
+    renderStats();
+
+    console.log('تم وضع الإشعار كمقروء:', notificationId);
+  } catch (error) {
+    console.error('خطأ وضع الإشعار كمقروء:', error);
+    alert('فشل وضع الإشعار كمقروء: ' + error.message);
+  }
 }
 
 function formatDate(date) {
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
 }
 
 function getRoomLabel(roomId) {
@@ -397,10 +460,18 @@ function getRoomLabel(roomId) {
 }
 
 function clearFilters() {
-  elements.filterDate.value = '';
-  elements.filterRoom.value = '';
-  elements.filterGroup.value = '';
+  if (elements.filterDate) elements.filterDate.value = '';
+  if (elements.filterRoom) elements.filterRoom.value = '';
+  if (elements.filterGroup) elements.filterGroup.value = '';
+
   renderBookingsTable();
+
+  console.log('تم مسح الفلاتر');
+}
+
+function timeToMinutes(value) {
+  const [h, m] = value.split(':').map(Number);
+  return h * 60 + m;
 }
 
 function showAuthError(message) {
